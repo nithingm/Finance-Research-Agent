@@ -1,0 +1,32 @@
+# Canonical schema (abridged) for MVP
+version: 0.1
+lines:
+  income_statement:
+    - revenue
+    - cogs
+    - gross_profit
+    - rnd
+    - sma
+    - gna
+    - sbc
+    - ebitda
+    - da
+    - ebit
+    - interest_net
+    - pretax
+    - tax
+    - net_income
+  balance_sheet:
+    - cash
+    - ar
+    - inventory
+    - ap
+    - st_debt
+    - lt_debt
+    - equity
+  cash_flow:
+    - cfo
+    - cfi
+    - cff
+    - delta_cash
+

@@ -1,0 +1,20 @@
+{
+  "version": "2024.0",
+  "aliases": {
+    "Revenue": "Revenue",
+    "CostOfSales": "CostOfSales"
+  },
+  "rules": [
+    {"tag": "Revenue", "canonical": "revenue", "sign": 1, "precedence": 10, "units": ["USD", "EUR", "GBP", "INR"]},
+    {"tag": "CostOfSales", "canonical": "cogs", "sign": 1, "precedence": 10, "units": ["USD", "EUR", "GBP", "INR"]},
+    {"tag": "ResearchAndDevelopmentExpense", "canonical": "rnd", "sign": 1, "precedence": 10},
+    {"tag": "AdministrativeExpense", "canonical": "gna", "sign": 1, "precedence": 10},
+    {"tag": "SellingExpense", "canonical": "sma", "sign": 1, "precedence": 10},
+    {"tag": "DepreciationAndAmortisationExpense", "canonical": "da", "sign": 1, "precedence": 10},
+    {"tag": "ProfitLossFromOperatingActivities", "canonical": "ebit", "sign": 1, "precedence": 10},
+    {"tag": "FinanceIncomeCostsNet", "canonical": "interest_net", "sign": 1, "precedence": 10},
+    {"tag": "CurrentTaxExpense", "canonical": "tax", "sign": 1, "precedence": 10},
+    {"tag": "ProfitLoss", "canonical": "net_income", "sign": 1, "precedence": 10}
+  ]
+}
+
