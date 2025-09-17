@@ -1,0 +1,22 @@
+{
+  "version": "2024.0",
+  "aliases": {
+    "SalesRevenueNet": "RevenueFromContractWithCustomerExcludingAssessedTax",
+    "SalesRevenueGoodsNet": "RevenueFromContractWithCustomerExcludingAssessedTax",
+    "CostOfGoodsAndServicesSold": "CostOfRevenue"
+  },
+  "rules": [
+    {"tag": "RevenueFromContractWithCustomerExcludingAssessedTax", "canonical": "revenue", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "SalesRevenueNet", "canonical": "revenue", "sign": 1, "precedence": 5, "units": ["USD"]},
+    {"tag": "CostOfRevenue", "canonical": "cogs", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "ResearchAndDevelopmentExpense", "canonical": "rnd", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "SellingGeneralAndAdministrativeExpense", "canonical": "sma", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "GeneralAndAdministrativeExpense", "canonical": "gna", "sign": 1, "precedence": 8, "units": ["USD"]},
+    {"tag": "DepreciationAndAmortization", "canonical": "da", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "OperatingIncomeLoss", "canonical": "ebit", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "InterestIncomeExpenseNet", "canonical": "interest_net", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "IncomeTaxExpenseBenefit", "canonical": "tax", "sign": 1, "precedence": 10, "units": ["USD"]},
+    {"tag": "NetIncomeLoss", "canonical": "net_income", "sign": 1, "precedence": 10, "units": ["USD"]}
+  ]
+}
+
