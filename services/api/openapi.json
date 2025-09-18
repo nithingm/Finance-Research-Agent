@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Finance Research Agent API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/runs": {
+      "post": {
+        "summary": "Start a new run",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_name": {"type": "string"}
+                },
+                "required": ["company_name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Run queued",
+            "content": {"application/json": {"schema": {"type": "object"}}}
+          },
+          "400": {"description": "Validation error"},
+          "401": {"description": "Unauthorized"},
+          "429": {"description": "Rate limited"}
+        }
+      }
+    },
+    "/runs/{id}": {
+      "get": {
+        "summary": "Get run status",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {"description": "Run info"},
+          "404": {"description": "Not found"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/runs/{id}/artifacts/{name}": {
+      "get": {
+        "summary": "Download artifact",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "name", "in": "path", "required": true, "schema": {"type": "string"}}
+        ],
+        "responses": {
+          "200": {"description": "Artifact content"},
+          "404": {"description": "Not found"},
+          "401": {"description": "Unauthorized"}
+        }
+      }
+    },
+    "/runs/{id}/events": {
+      "get": {
+        "summary": "WebSocket endpoint for events",
+        "description": "Upgrade to WebSocket to receive events",
+        "responses": {"101": {"description": "Switching Protocols"}}
+      }
+    }
+  }
+}
+

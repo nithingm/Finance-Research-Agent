@@ -5,6 +5,11 @@ import threading
 import time
 import uuid
 
+import os
+import json
+from pathlib import Path
+import queue
+
 from services.resolver.core import resolve as resolve_entity
 from services.mapper.engine import Mapper
 from services.historical.timeseries import stitch_periods, validate_accounting_identities
@@ -53,6 +58,76 @@ class RunRegistry:
                 return
             for k, v in kwargs.items():
                 setattr(r, k, v)
+ARTIFACTS_ROOT = Path(os.environ.get("ARTIFACTS_ROOT", "./run_artifacts")).resolve()
+ARTIFACTS_ROOT.mkdir(parents=True, exist_ok=True)
+# Worker settings (configurable via env)
+_MAX_WORKERS = int(os.environ.get("JOB_WORKERS", "2"))
+_MAX_RETRIES = int(os.environ.get("JOB_MAX_RETRIES", "1"))
+_BACKOFF_BASE = float(os.environ.get("JOB_BACKOFF_BASE", "0.1"))
+
+# Track retries per run id
+_retries: Dict[str, int] = {}
+
+
+# Minimal in-process queue to simulate background workers
+_JOB_Q: "queue.Queue[str]" = queue.Queue(maxsize=100)
+
+
+def _persist_run(run: "Run") -> None:
+    """Persist artifacts and a metadata JSON for the run to disk."""
+    run_dir = ARTIFACTS_ROOT / run.id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    # Write artifacts
+    for name, body in (run.artifacts or {}).items():
+        (run_dir / name).write_text(body)
+    # Write metadata/summary/events
+    meta = {
+        "run_id": run.id,
+        "company_name": run.company_name,
+        "status": run.status,
+        "summary": run.summary,
+        "events": run.events,
+        "error": run.error,
+        "artifacts": list(run.artifacts.keys()),
+        "completed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+    (run_dir / "run.json").write_text(json.dumps(meta, indent=2))
+
+
+def _worker_loop(worker_id: int = 0):  # pragma: no cover (verified via API tests)
+    while True:
+        rid = _JOB_Q.get()
+        try:
+            run = REGISTRY.get(rid)
+            if run is None:
+                continue
+            try:
+                orchestrate(run)
+            except Exception:
+                # Orchestrate already marks run failed; try retry/backoff
+                count = _retries.get(rid, 0)
+                if count < _MAX_RETRIES:
+                    _retries[rid] = count + 1
+                    time.sleep(_BACKOFF_BASE * (2 ** count))
+                    _JOB_Q.put(rid)
+                else:
+                    _retries.pop(rid, None)
+            # Persist regardless of success/failure
+            try:
+                _persist_run(run)
+            except Exception:
+                pass
+        finally:
+            _JOB_Q.task_done()
+
+
+# Start worker threads at import time (daemon)
+_workers: List[threading.Thread] = []
+for i in range(max(1, _MAX_WORKERS)):
+    t = threading.Thread(target=_worker_loop, kwargs={'worker_id': i}, daemon=True)
+    t.start()
+    _workers.append(t)
+
 
 
 REGISTRY = RunRegistry()
@@ -211,7 +286,7 @@ def orchestrate(run: Run):
 
 def start_run(company_name: str) -> str:
     run = REGISTRY.create(company_name)
-    t = threading.Thread(target=orchestrate, args=(run,), daemon=True)
-    t.start()
+    # Enqueue job for background worker
+    _JOB_Q.put(run.id)
     return run.id
 
